@@ -56,7 +56,7 @@ function App() {
       console.log('Request Payload:', data);
 
       // Send data to backend
-      const res = await fetch('http://localhost:5000/api/gemini', {
+      const res = await fetch('https://complyv2-backend.onrender.com/api/gemini', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
