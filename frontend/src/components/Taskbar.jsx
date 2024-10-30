@@ -16,11 +16,15 @@ const Taskbar = () => {
     setNotificationOpen(!isNotificationOpen);
   };
 
+  const handleLogout = () => {
+    window.location.href = 'https://comply-log-fron.onrender.com/login';
+  };
+
   const notifications = [
-    "File upload completed.",
-    "Audit Report has been reviewed.",
-    "New document added to the library.",
-    "Compliance check passed successfully.",
+    'File upload completed.',
+    'Audit Report has been reviewed.',
+    'New document added to the library.',
+    'Compliance check passed successfully.',
   ];
 
   return (
@@ -88,7 +92,7 @@ const Taskbar = () => {
             <button className="profile-btn">
               <FaCog className="dropdown-icon" /> Settings
             </button>
-            <button className="logout-btn">
+            <button className="logout-btn" onClick={handleLogout}>
               <FaSignOutAlt className="dropdown-icon" /> Logout
             </button>
           </div>
