@@ -1,59 +1,101 @@
+// Taskbar.js
 import React, { useState } from 'react';
 import './Taskbar.css';
-import docIcon from './assets/docicon.png';
+import { FaUserCircle, FaSearch, FaCog, FaSignOutAlt, FaBell } from 'react-icons/fa';
+import logo from '../assets/comply-logo-white.svg';
 
 const Taskbar = () => {
-    const [documentType, setDocumentType] = useState("Select Type");
-    const [industry, setIndustry] = useState("Select Industry");
-    const [fileName, setFileName] = useState("");
+  const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [isNotificationOpen, setNotificationOpen] = useState(false);
 
-    const handleDocumentTypeSelect = (eventKey) => {
-        setDocumentType(eventKey);
-    };
+  const toggleProfileMenu = () => {
+    setProfileMenuOpen(!isProfileMenuOpen);
+  };
 
-    const handleIndustrySelect = (eventKey) => {
-        setIndustry(eventKey);
-    };
+  const toggleNotificationMenu = () => {
+    setNotificationOpen(!isNotificationOpen);
+  };
 
-    return (
-        <div className="taskbar">
-            {/* Left Section */}
-            <div className="left-section">
-                <img src={docIcon} alt="Document Icon" style={{ width: '24px', height: '24px', marginRight: '10px' }} />
-                <span>COMPLY</span>
-            </div>
+  const notifications = [
+    "File upload completed.",
+    "Audit Report has been reviewed.",
+    "New document added to the library.",
+    "Compliance check passed successfully.",
+  ];
 
-            {/* Middle Section */}
-            <div className="middle-section">
-                <div className="dropdown">
-                    <button className="dropbtn">Document Type: {documentType}</button>
-                    <div className="dropdown-content">
-                        <a onClick={() => handleDocumentTypeSelect("SOP")}>SOP</a>
-                        <a onClick={() => handleDocumentTypeSelect("Deviation")}>Deviation</a>
-                    </div>
+  return (
+    <div className="taskbar">
+      {/* Logo Section */}
+      <div className="logo">
+        <img src={logo} alt="Comply Logo" className="logo-img" />
+        <span>COMPLY</span>
+      </div>
+
+      {/* Search Bar */}
+      <div className="search-bar">
+        <input type="text" placeholder="Search documents, reports, etc." />
+        <FaSearch className="search-icon" />
+      </div>
+
+      {/* Dropdown Section */}
+      <div className="dropdown-group">
+        <select className="dropdown">
+          <option>Document Type</option>
+          <option>Deviation Report</option>
+          <option>SOP Report</option>
+          <option>JSA Report</option>
+          <option>EIA Report</option>
+        </select>
+
+        <select className="dropdown">
+          <option>Section</option>
+          <option>Deviation Description</option>
+          <option>Impact Assessment</option>
+          <option>Root Cause Analysis</option>
+          <option>Corrective Actions</option>
+          <option>Preventive Actions</option>
+          <option>Investigation Procedure</option>
+          <option>Quality Assurance Review</option>
+          <option>CAPA Implementation</option>
+          <option>Supporting Documents</option>
+          <option>Approval and Closure</option>
+        </select>
+      </div>
+
+      {/* Notification Icon */}
+      <div className="notification-menu" onClick={toggleNotificationMenu}>
+        <FaBell className="notification-icon" />
+        {isNotificationOpen && (
+          <div className="notification-dropdown">
+            {notifications.length ? (
+              notifications.map((notification, index) => (
+                <div key={index} className="notification-item">
+                  {notification}
                 </div>
-                <div className="dropdown">
-                    <button className="dropbtn">Industry: {industry}</button>
-                    <div className="dropdown-content">
-                        <a onClick={() => handleIndustrySelect("Industry 1")}>Industry 1</a>
-                        <a onClick={() => handleIndustrySelect("Industry 2")}>Industry 2</a>
-                    </div>
-                </div>
-                <input 
-                    type="text" 
-                    placeholder="Change File Name" 
-                    value={fileName}
-                    onChange={(e) => setFileName(e.target.value)} 
-                    style={{ marginLeft: '20px', padding: '5px', borderRadius: '4px' }}
-                />
-            </div>
+              ))
+            ) : (
+              <div className="notification-item">No new notifications</div>
+            )}
+          </div>
+        )}
+      </div>
 
-            {/* Right Section */}
-            <div className="right-section">
-                <button onClick={() => alert('Logout')}>Logout</button>
-            </div>
-        </div>
-    );
+      {/* Profile and Settings */}
+      <div className="profile-menu" onClick={toggleProfileMenu}>
+        <FaUserCircle className="profile-icon" />
+        {isProfileMenuOpen && (
+          <div className="dropdown-content">
+            <button className="profile-btn">
+              <FaCog className="dropdown-icon" /> Settings
+            </button>
+            <button className="logout-btn">
+              <FaSignOutAlt className="dropdown-icon" /> Logout
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default Taskbar;
