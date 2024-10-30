@@ -1,124 +1,127 @@
 import React, { useEffect, useCallback, useImperativeHandle, useState, forwardRef } from 'react';
-import Quill from "quill"
-import "quill/dist/quill.snow.css"
-//import { io } from "socket.io-client"
-import { useParams } from "react-router-dom"
+import Quill from 'quill';
+import 'quill/dist/quill.snow.css';
+import { useParams } from 'react-router-dom';
+import './Editor.css'; // Custom CSS for better styling
+import { ToastContainer, toast } from 'react-toastify'; // For notifications
+import 'react-toastify/dist/ReactToastify.css'; // Include styles for notifications
+import debounce from "lodash/debounce"; // Ensure lodash is imported
 
-const SAVE_INTERVAL_MS = 2000
 const TOOLBAR_OPTIONS = [
   [{ header: [1, 2, 3, 4, 5, 6, false] }],
   [{ font: [] }],
-  [{ list: "ordered" }, { list: "bullet" }],
-  ["bold", "italic", "underline"],
+  [{ list: 'ordered' }, { list: 'bullet' }],
+  ['bold', 'italic', 'underline', 'strike'],
   [{ color: [] }, { background: [] }],
-  [{ script: "sub" }, { script: "super" }],
+  [{ script: 'sub' }, { script: 'super' }],
   [{ align: [] }],
-  ["image", "blockquote"],
-  ["clean"],
-]
+  ['image', 'blockquote', 'code-block'],
+  ['clean'],
+];
 
 const TextEditor = forwardRef((props, ref) => {
-  const { id: documentId } = useParams()
-  //const [socket, setSocket] = useState()
-  const [quill, setQuill] = useState()
+  const { id: documentId } = useParams();
+  const [quill, setQuill] = useState(null);
+  const [isSaving, setIsSaving] = useState(false); // State for saving status
+  const [hasContent, setHasContent] = useState(false); // State to track if content is present
 
+  // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
     getEditorInstance: () => quill,
-    getText: () => quill ? quill.getText() : "",
-    getSelection: () => quill ? quill.getSelection() : null,
+    getText: () => (quill ? quill.getText() : ''),
+    getSelection: () => (quill ? quill.getSelection() : null),
+    setGeneratedText: (text) => {
+      if (quill) {
+        quill.setText(text);       // Set the generated text
+        setHasContent(text.trim().length > 0); // Show "+" button if content is present
+      }
+    }
   }));
 
-  // useEffect(() => {
-  //   const s = io("http://localhost:3001")
-  //   setSocket(s)
+  // Initialize Quill editor
+  const wrapperRef = useCallback((wrapper) => {
+    if (!wrapper) return;
 
-  //   return () => {
-  //     s.disconnect()
-  //   }
-  // }, [])
+    wrapper.innerHTML = ''; // Clean previous editor instance
+    const editor = document.createElement('div');
+    wrapper.append(editor);
 
-  // useEffect(() => {
-  //   if (quill == null) return
-
-  //   socket.once("load-document", document => {
-  //     quill.setContents(document)
-  //     quill.enable()
-  //   })
-
-  //   socket.emit("get-document", documentId)
-  // }, [socket, quill, documentId])
-
-  // useEffect(() => {
-  //   if (socket == null || quill == null) return
-
-  //   const interval = setInterval(() => {
-  //     socket.emit("save-document", quill.getContents())
-  //   }, SAVE_INTERVAL_MS)
-
-  //   return () => {
-  //     clearInterval(interval)
-  //   }
-  // }, [socket, quill])
-
-  // useEffect(() => {
-  //   if (socket == null || quill == null) return
-
-  //   const handler = delta => {
-  //     quill.updateContents(delta)
-  //   }
-  //   socket.on("receive-changes", handler)
-
-  //   return () => {
-  //     socket.off("receive-changes", handler)
-  //   }
-  // }, [socket, quill])
-
-  // useEffect(() => {
-  //   if (socket == null || quill == null) return
-
-  //   const handler = (delta, oldDelta, source) => {
-  //     if (source !== "user") return
-  //     socket.emit("send-changes", delta)
-  //   }
-  //   quill.on("text-change", handler)
-
-  //   return () => {
-  //     quill.off("text-change", handler)
-  //   }
-  // }, [socket, quill])
-  useEffect(() => {
-    if (quill == null) return
-
-    quill.enable()
-    quill.root.style.color = 'black'
-  }, [quill])
-  const wrapperRef = useCallback(wrapper => {
-    if (wrapper == null) return
-
-    wrapper.innerHTML = ""
-    const editor = document.createElement("div")
-    wrapper.append(editor)
     const q = new Quill(editor, {
-      theme: "snow",
+      theme: 'snow',
       modules: { toolbar: TOOLBAR_OPTIONS },
-    })
-    q.disable()
-    q.setText("Loading...")
-    setQuill(q)
-  }, [])
+    });
 
+    q.disable(); // Disable until content loads
+    q.setText('Loading...'); // Temporary loading state
+    setQuill(q);
+  }, []);
+
+  // Enable editor and set content check once it's ready
+  useEffect(() => {
+    if (quill) {
+      quill.enable();
+      quill.root.style.color = 'black'; // Ensure text color is readable
+      
+      // Check initial content to update hasContent
+      setHasContent(quill.getText().trim().length > 0);
+    }
+  }, [quill]);
+
+  // Function to handle content save
+  const saveContent = () => {
+    if (quill && !isSaving) {
+      const content = quill.root.innerHTML; // Get editor content
+      setIsSaving(true); // Set saving status to true
+      
+      // Simulate an API call with a timeout (replace this with your actual API call)
+      setTimeout(() => {
+        // Assume save is successful; implement your save logic here
+        toast.success('Content saved successfully!'); 
+        setIsSaving(false); // Reset saving status after saving
+      }, 1000); // Simulated save delay (1 second)
+    }
+  };
+
+  // Create a debounced version of the saveContent function
+  const debouncedSaveContent = useCallback(debounce(saveContent, 1000), [quill]); // Adjust the debounce time as necessary
+
+  // Track content changes to show/hide the "+" button
+  useEffect(() => {
+    if (quill) {
+      const handleTextChange = () => {
+        const content = quill.getText().trim();
+        setHasContent(content.length > 0); // Update hasContent based on text presence
+      };
+
+      quill.on('text-change', handleTextChange); // Attach event listener to track content changes
+      return () => quill.off('text-change', handleTextChange); // Clean up event listener on unmount
+    }
+  }, [quill]);
 
   return (
-    <>
-      <div className="middle-section">
-        <div className="container" ref={wrapperRef} style={{ position: "relative",height: "calc(100vh - 50px)" }}>
+    <div className="editor-container">
+      <div className="quill-wrapper" ref={wrapperRef} />
+      
+      {/* Conditionally render the "+" symbol button based on content */}
+      {hasContent && (
+        <div className="editor-button-container">
+          <button
+            className="add-symbol-button"
+            onClick={() => {
+              if (quill) {
+                const length = quill.getLength(); // Get current length of the content
+                quill.insertText(length - 1, '+'); // Insert '+' at the end of content
+              }
+            }}
+          >
+            +
+          </button>
         </div>
-        {/* <InputBox /> */}
-      </div>
+      )}
 
-    </>
-  )
-
+      <ToastContainer position="bottom-right" autoClose={5000} hideProgressBar closeOnClick draggable pauseOnHover />
+    </div>
+  );
 });
 
 export default TextEditor;
