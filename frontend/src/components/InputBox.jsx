@@ -3,16 +3,25 @@ import './InputBox.css';
 
 const InputBox = forwardRef((props, ref) => {
   const [input, setInput] = useState('');
+  const [isSending, setIsSending] = useState(false);
 
   const handleSend = () => {
     if (input.trim()) {
+      setIsSending(true);
       props.onSubmit(input);
       setInput('');
+      setTimeout(() => setIsSending(false), 1000);
     }
   };
 
+  const handleAddSymbol = () => {
+    // Define what the "+" button should do, e.g., add a "+" symbol to the input
+    setInput((prev) => `${prev} +`);
+  };
+
   useImperativeHandle(ref, () => ({
-    handleSend
+    handleSend,
+    handleAddSymbol,
   }));
 
   return (
@@ -21,9 +30,13 @@ const InputBox = forwardRef((props, ref) => {
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="Go to the section to Change and prompt here to change it..."
+        placeholder="Type your message here..."
+        aria-label="Message input"
+        disabled={isSending}
       />
-      <button onClick={handleSend}>Send</button>
+      <button onClick={handleSend} disabled={isSending}>
+        {isSending ? 'Sending...' : 'Send'}
+      </button>
     </div>
   );
 });
