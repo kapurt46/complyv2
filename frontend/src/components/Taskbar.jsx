@@ -3,19 +3,21 @@ import React, { useState } from 'react';
 import './Taskbar.css';
 import { FaUserCircle, FaSearch, FaCog, FaSignOutAlt, FaBell } from 'react-icons/fa';
 import logo from '../assets/comply-logo-white.svg';
-import { useNavigate } from 'react-router-dom'; // Ensure React Router is used for navigation.
 
 const Taskbar = () => {
   const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
   const [isNotificationOpen, setNotificationOpen] = useState(false);
-  const navigate = useNavigate(); // React Router hook for programmatic navigation.
 
-  const toggleProfileMenu = () => setProfileMenuOpen(!isProfileMenuOpen);
-  const toggleNotificationMenu = () => setNotificationOpen(!isNotificationOpen);
+  const toggleProfileMenu = () => {
+    setProfileMenuOpen(!isProfileMenuOpen);
+  };
+
+  const toggleNotificationMenu = () => {
+    setNotificationOpen(!isNotificationOpen);
+  };
 
   const handleLogout = () => {
-    // Perform any cleanup, like clearing tokens or session data.
-    navigate('/login'); // Route-based redirection using React Router.
+    window.location.href = 'https://comply-log-fron.onrender.com/login';
   };
 
   const notifications = [
