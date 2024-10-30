@@ -1,90 +1,29 @@
-// import Message from './Message';
-// import InputBox from './InputBox';
-// import './Chat.css';
+// src/components/Chat.jsx
+import React, { useRef, useState } from 'react';
+import InputBox from './InputBox';
+import Message from './Message';
+import './Chat.css';
 
+const Chat = () => {
+  const [messages, setMessages] = useState([]);
+  const inputRef = useRef();
 
-// // const Chat = () => {
-// //   const [messages, setMessages] = useState([
-// //     { text: 'Hello! How can I help you today?', sender: 'bot' },
-// //     { text: 'What is the weather today?', sender: 'user' }
-// //   ]);
+  const handleSubmit = (text) => {
+    const newMessage = { text, sender: 'user', timestamp: Date.now() };
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    inputRef.current.handleSend(); // Clear input after sending
+  };
 
-// //   const addMessage = (message) => {
-// //     setMessages([...messages, { text: message, sender: 'user' }]);
-// //   };
+  return (
+    <div className="chat-container">
+      <div className="messages">
+        {messages.map((msg, index) => (
+          <Message key={index} message={msg} />
+        ))}
+      </div>
+      <InputBox ref={inputRef} onSubmit={handleSubmit} />
+    </div>
+  );
+};
 
-// //   return (
-// //     <div className="chat-container">
-// //       <div className="messages">
-// //         {messages.map((message, index) => (
-// //           <Message key={index} message={message} />
-// //         ))}
-// //       </div>
-// //       <InputBox addMessage={addMessage} />
-// //     </div>
-// //   );
-// // };
-// import React, { useRef, useState } from 'react';
-// import Editor from './Editor';
-
-// const Delta = Quill.import('delta');
-
-// const Chat = () => {
-//   const [range, setRange] = useState();
-//   const [lastChange, setLastChange] = useState();
-//   const [readOnly, setReadOnly] = useState(false);
-
-//   // Use a ref to access the quill instance directly
-//   const quillRef = useRef();
-
-//   return (
-//     <div>
-//       <Editor
-//         ref={quillRef}
-//         readOnly={readOnly}
-//         defaultValue={new Delta()
-//           .insert('Hello')
-//           .insert('\n', { header: 1 })
-//           .insert('Some ')
-//           .insert('initial', { bold: true })
-//           .insert(' ')
-//           .insert('content', { underline: true })
-//           .insert('\n')}
-//         onSelectionChange={setRange}
-//         onTextChange={setLastChange}
-//       />
-//       <div class="controls">
-//         <label>
-//           Read Only:{' '}
-//           <input
-//             type="checkbox"
-//             value={readOnly}
-//             onChange={(e) => setReadOnly(e.target.checked)}
-//           />
-//         </label>
-//         <button
-//           className="controls-right"
-//           type="button"
-//           onClick={() => {
-//             alert(quillRef.current?.getLength());
-//           }}
-//         >
-//           Get Content Length
-//         </button>
-//       </div>
-//       <div className="state">
-//         <div className="state-title">Current Range:</div>
-//         {range ? JSON.stringify(range) : 'Empty'}
-//       </div>
-//       <div className="state">
-//         <div className="state-title">Last Change:</div>
-//         {lastChange ? JSON.stringify(lastChange.ops) : 'Empty'}
-//       </div>
-//     </div>
-//   );
-// };
-
-
-
-// export default Chat;
-
+export default Chat;
